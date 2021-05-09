@@ -17,9 +17,6 @@ app.set('port', process.env.PORT || 9000);
 app.use(myconn(mysql, dbOptions, "single"));
 app.use(express.json());
 // Router Api
-app.get('/',(req,send)=>{
-    send.send('hola')
-})
 app.use('/api', routes);
 
 
