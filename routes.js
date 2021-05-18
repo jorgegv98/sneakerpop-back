@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const routes = express.Router();
 
 // Routes
-routes.post("/login",(req, res) => {
+routes.post("/login", (req, res) => {
   req.getConnection((err, conn) => {
     if (err) return res.send(err);
     conn.query(
@@ -14,12 +14,16 @@ routes.post("/login",(req, res) => {
       async (err, rows) => {
         if (err) return res.send(err);
         if (rows) {
-          const validPass = await bcrypt.compare(req.body.password, rows[0].password);
+          const validPass = await bcrypt.compare(
+            req.body.password,
+            rows[0].password
+          );
           if (validPass) {
             jwt.sign({ user: rows }, "secretKey", (error, token) => {
               res.json({
                 user: rows[0].email,
                 token: token,
+                rol: rows[0].rol,
               });
             });
           } else {
@@ -56,28 +60,13 @@ routes.post("/register", async (req, res) => {
 
 // -------------------------------- Sneakers ---------------------------------------------------
 routes.get("/sneakers", (req, res) => {
-  token = req.headers["authorization"];
-  if (!token) {
-    res.status(401).send({
-      error: "Necesario autentificacion",
-    });
-    return;
-  }
-  jwt.verify(token, "secretKey", (error, user) => {
-    if (error) {
-      res.json({
-        error: "Token Invalido",
-      });
-    } else {
-      req.getConnection((err, conn) => {
-        if (err) return res.send(err);
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
 
-        conn.query("SELECT * FROM sneakers", (err, rows) => {
-          if (err) return res.send(err);
-          res.json(rows);
-        });
-      });
-    }
+    conn.query("SELECT * FROM sneakers", (err, rows) => {
+      if (err) return res.send(err);
+      res.json(rows);
+    });
   });
 });
 
@@ -97,26 +86,60 @@ routes.get("/sneaker/:id", (req, res) => {
 });
 
 routes.post("/sneaker", (req, res) => {
-  req.getConnection((err, conn) => {
-    if (err) return res.send(err);
-    conn.query("INSERT INTO sneakers set ?", [req.body], (err, rows) => {
-      if (err) return res.send(err);
-      res.json(req.body);
+  token = req.headers["authorization"];
+  if (!token) {
+    res.status(401).send({
+      error: "Necesario autentificacion",
     });
+    return;
+  }
+  jwt.verify(token, "secretKey", (error, user) => {
+    if (error) {
+      res.json({
+        error: "Token Invalido",
+      });
+    } else {
+      req.getConnection((err, conn) => {
+        if (err) return res.send(err);
+        conn.query("INSERT INTO sneakers set ?", [req.body], (err, rows) => {
+          if (err) return res.send(err);
+          res.json(req.body);
+        });
+      });
+    }
   });
 });
 
 routes.delete("/sneaker/:id", (req, res) => {
-  req.getConnection((err, conn) => {
-    if (err) return res.send(err);
-    conn.query(
-      "DELETE FROM sneakers WHERE id = ?",
-      [req.params.id],
-      (err, rows) => {
+
+  token = req.headers["authorization"];
+  if (!token) {
+    res.status(401).send({
+      error: "Necesario autentificacion",
+    });
+    return;
+  }
+  jwt.verify(token, "secretKey", (error, user) => {
+    if (error) {
+      res.json({
+        error: "Token Invalido",
+      });
+    } else {
+      req.getConnection((err, conn) => {
         if (err) return res.send(err);
-        res.send("Zapatilla eliminada correctamente");
-      }
-    );
+          req.getConnection((err, conn) => {
+            if (err) return res.send(err);
+            conn.query(
+              "DELETE FROM sneakers WHERE id = ?",
+              [req.params.id],
+              (err, rows) => {
+                if (err) return res.send(err);
+                res.send("Zapatilla eliminada correctamente");
+              }
+            );
+          });
+      });
+    }
   });
 });
 
@@ -186,12 +209,27 @@ routes.get("/raffles", (req, res) => {
 });
 
 routes.post("/raffle", (req, res) => {
-  req.getConnection((err, conn) => {
-    if (err) return res.send(err);
-    conn.query("INSERT INTO raffles set ?", [req.body], (err, rows) => {
-      if (err) return res.send(err);
-      res.json(req.body);
+  token = req.headers["authorization"];
+  if (!token) {
+    res.status(401).send({
+      error: "Necesario autentificacion",
     });
+    return;
+  }
+  jwt.verify(token, "secretKey", (error, user) => {
+    if (error) {
+      res.json({
+        error: "Token Invalido",
+      });
+    } else {
+      req.getConnection((err, conn) => {
+        if (err) return res.send(err);
+        conn.query("INSERT INTO raffles set ?", [req.body], (err, rows) => {
+          if (err) return res.send(err);
+          res.json(req.body);
+        });
+      });
+    }
   });
 });
 
@@ -209,6 +247,59 @@ routes.get("/raffle/:id", (req, res) => {
     );
   });
 });
+// ------------------------------------- Shops --------------------------------------------
+routes.get("/shops", (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
+
+    conn.query("SELECT * FROM shops", (err, rows) => {
+      if (err) return res.send(err);
+      res.json(rows);
+    });
+  });
+});
+
+routes.post("/shop", (req, res) => {
+  token = req.headers["authorization"];
+  if (!token) {
+    res.status(401).send({
+      error: "Necesario autentificacion",
+    });
+    return;
+  }
+  jwt.verify(token, "secretKey", (error, user) => {
+    if (error) {
+      res.json({
+        error: "Token Invalido",
+      });
+    } else {
+      req.getConnection((err, conn) => {
+        if (err) return res.send(err);
+        conn.query("INSERT INTO shop set ?", [req.body], (err, rows) => {
+          if (err) return res.send(err);
+          res.json(req.body);
+        });
+      });
+    }
+  });
+});
+
+routes.get("/shop/:id", (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
+
+    conn.query(
+      "SELECT * FROM shops WHERE id = ?",
+      [req.params.id],
+      (err, rows) => {
+        if (err) return res.send(err);
+        res.json(rows);
+      }
+    );
+  });
+});
+
+
 
 function verifyToken(req, res, next) {
   const tokenHeader = req.headers["authorization"];

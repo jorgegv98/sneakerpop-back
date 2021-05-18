@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require("mysql");
 const myconn = require("express-myconnection");
+var cors = require("cors");
 const app = express();
 const routes = require('./routes');
 const dbOptions = {
@@ -14,6 +15,7 @@ const dbOptions = {
 app.set('port', process.env.PORT || 9000);
 
 //Middlewares
+app.use(cors());
 app.use(myconn(mysql, dbOptions, "single"));
 app.use(express.json());
 // Router Api
