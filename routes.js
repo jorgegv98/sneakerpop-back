@@ -1,6 +1,5 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const verify = require("jsonwebtoken/verify");
 const bcrypt = require("bcryptjs");
 const routes = express.Router();
 
@@ -111,7 +110,6 @@ routes.post("/sneaker", (req, res) => {
 });
 
 routes.delete("/sneaker/:id", (req, res) => {
-
   token = req.headers["authorization"];
   if (!token) {
     res.status(401).send({
@@ -127,17 +125,17 @@ routes.delete("/sneaker/:id", (req, res) => {
     } else {
       req.getConnection((err, conn) => {
         if (err) return res.send(err);
-          req.getConnection((err, conn) => {
-            if (err) return res.send(err);
-            conn.query(
-              "DELETE FROM sneakers WHERE id = ?",
-              [req.params.id],
-              (err, rows) => {
-                if (err) return res.send(err);
-                res.send("Zapatilla eliminada correctamente");
-              }
-            );
-          });
+        req.getConnection((err, conn) => {
+          if (err) return res.send(err);
+          conn.query(
+            "DELETE FROM sneakers WHERE id = ?",
+            [req.params.id],
+            (err, rows) => {
+              if (err) return res.send(err);
+              res.send("Zapatilla eliminada correctamente");
+            }
+          );
+        });
       });
     }
   });
@@ -298,8 +296,6 @@ routes.get("/shop/:id", (req, res) => {
     );
   });
 });
-
-
 
 function verifyToken(req, res, next) {
   const tokenHeader = req.headers["authorization"];
