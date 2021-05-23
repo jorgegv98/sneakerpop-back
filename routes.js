@@ -236,7 +236,7 @@ routes.get("/raffle/:id", (req, res) => {
     if (err) return res.send(err);
 
     conn.query(
-      "SELECT * FROM brands WHERE id = ?",
+      "SELECT * FROM raffle WHERE id = ?",
       [req.params.id],
       (err, rows) => {
         if (err) return res.send(err);
@@ -245,6 +245,39 @@ routes.get("/raffle/:id", (req, res) => {
     );
   });
 });
+
+routes.post("/raffle/:id", (req, res) => {
+  token = req.headers["authorization"];
+  if (!token) {
+    res.status(401).send({
+      error: "Necesario autentificacion",
+    });
+    return;
+  }
+  jwt.verify(token, "secretKey", (error, user) => {
+    if (error) {
+      res.json({
+        error: "Token Invalido",
+      });
+    } else {
+      req.getConnection((err, conn) => {
+        if (err) return res.send(err);
+        req.getConnection((err, conn) => {
+          if (err) return res.send(err);
+          conn.query(
+            "UPDATE raffles set ? WHERE id = ?",
+            [req.body,req.params.id],
+            (err, rows) => {
+              if (err) return res.send(err);
+              res.send("Apuntado correctamente correctamente");
+            }
+          );
+        });
+      });
+    }
+  });
+});
+
 // ------------------------------------- Shops --------------------------------------------
 routes.get("/shops", (req, res) => {
   req.getConnection((err, conn) => {
